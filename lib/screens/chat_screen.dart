@@ -3,7 +3,9 @@ import 'package:chat_app/controllers/chat_controller.dart';
 import 'package:chat_app/widgets/chat_bubble.dart';
 import 'package:chat_app/widgets/text_input_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class ChatScreen extends StatefulWidget {
   final String receiverEmail;
@@ -77,6 +79,7 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         elevation: 0,
         scrolledUnderElevation: 0,
+        backgroundColor: Theme.of(context).colorScheme.background,
         title: Text(widget.receiverEmail),
         centerTitle: true,
       ),
@@ -146,7 +149,82 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment:
             isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          ChatBubble(message: data['message'], isCurrentUser: isCurrentUser),
+          GestureDetector(
+            onLongPress: () async {
+              showDialog(
+                context: context,
+                builder: (_) => CupertinoAlertDialog(
+                  actions: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Clipboard.setData(
+                                    ClipboardData(text: data['message']))
+                                .then((_) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Copied!',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  backgroundColor: Colors.black,
+                                  duration: Duration(milliseconds: 500),
+                                ),
+                              );
+                            });
+                            Navigator.pop(context);
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.copy),
+                              Text(
+                                ' Copy',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  '  Deleted!',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                backgroundColor: Colors.black,
+                                duration: Duration(milliseconds: 1000),
+                              ),
+                            );
+                            await _chatController.deleteMessage(
+                                widget.receiverId, doc.id);
+                          },
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.delete),
+                              Text(
+                                ' Delete',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+            child: ChatBubble(
+              message: data['message'],
+              isCurrentUser: isCurrentUser,
+            ),
+          ),
         ],
       ),
     );
@@ -154,7 +232,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildUserInput() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 25.0, top: 5),
+      padding: const EdgeInsets.only(bottom: 25.0, top: 10),
       child: Row(
         children: [
           Expanded(

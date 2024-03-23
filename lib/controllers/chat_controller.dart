@@ -49,6 +49,21 @@ class ChatController {
         .add(newMessage.toMap());
   }
 
+  Future<void> deleteMessage(String receiverId,String id) async {
+    final String currentUserId = _firebaseAuth.currentUser!.uid;
+
+    List<String> ids = [currentUserId, receiverId];
+    ids.sort();
+    String chatRoomId = ids.join('_');
+
+    await _firestore
+        .collection('Chat_Rooms')
+        .doc(chatRoomId)
+        .collection('Messages')
+        .doc(id)
+        .delete();
+  }
+
   // get message
   Stream<QuerySnapshot> getMessages(String userId, String otherUserId) {
     List<String> ids = [userId, otherUserId];

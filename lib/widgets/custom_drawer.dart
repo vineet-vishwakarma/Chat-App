@@ -28,11 +28,12 @@ class CustomDrawer extends StatelessWidget {
                   ),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(left: 25.0),
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
-                  leading: Icon(Icons.home),
-                  title: Text("H O M E"),
+                  leading: const Icon(Icons.home),
+                  title: const Text("H O M E"),
+                  onTap: () => Navigator.pop(context),
                 ),
               ),
               Padding(

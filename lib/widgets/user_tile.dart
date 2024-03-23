@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class UserTile extends StatelessWidget {
@@ -17,18 +18,51 @@ class UserTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(
-              Icons.person,
-              color: Theme.of(context).colorScheme.onPrimary,
+            Row(
+              children: [
+                const Icon(Icons.person),
+                const SizedBox(width: 20),
+                Text(
+                  text,
+                  style: const TextStyle(fontSize: 15),
+                ),
+              ],
             ),
-            const SizedBox(width: 20),
-            Text(
-              text,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
-                fontSize: 15,
-              ),
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => CupertinoAlertDialog(
+                    actions: [
+                      CupertinoActionSheet(
+                        actions: [
+                          Container(
+                            margin: const EdgeInsets.all(10),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.copy),
+                                Text('Copy'),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.all(10),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.delete),
+                                Text('Delete'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: const Icon(Icons.more_vert_rounded),
             ),
           ],
         ),
