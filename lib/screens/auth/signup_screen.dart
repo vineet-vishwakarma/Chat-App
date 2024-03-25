@@ -7,20 +7,23 @@ import 'package:flutter/material.dart';
 
 class SignupScreen extends StatelessWidget {
   final void Function()? onTap;
-  SignupScreen({super.key,@required this.onTap});
+  SignupScreen({super.key, @required this.onTap});
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
 
   void signup(BuildContext context) async {
     final auth = AuthController();
 
-    if (_passwordController.text == _confirmPasswordController.text) {
+    if (_passwordController.text.isNotEmpty &&
+        _usernameController.text.isNotEmpty) {
       try {
-        await auth.signUpWithEmailPassword(
-            _emailController.text, _passwordController.text);
+        await auth.signUpWithEmailPassword(_emailController.text,
+            _passwordController.text, _usernameController.text);
+        _emailController.clear();
+        _passwordController.clear();
+        _usernameController.clear();
       } catch (e) {
         showDialog(
           context: context,
@@ -33,7 +36,7 @@ class SignupScreen extends StatelessWidget {
       showDialog(
         context: context,
         builder: (context) => const AlertDialog(
-          title: Text("Password don't match!"),
+          title: Text("Fill all fields!!"),
         ),
       );
     }
@@ -62,6 +65,11 @@ class SignupScreen extends StatelessWidget {
             ),
             const SizedBox(height: 25),
             TextInputField(
+              controller: _usernameController,
+              labelText: 'Username',
+            ),
+            const SizedBox(height: 10),
+            TextInputField(
               controller: _emailController,
               labelText: 'Email',
               // icon: Icons.email,
@@ -70,13 +78,6 @@ class SignupScreen extends StatelessWidget {
             TextInputField(
               controller: _passwordController,
               labelText: 'Password',
-              // icon: Icons.remove_red_eye,
-              isObscure: true,
-            ),
-            const SizedBox(height: 10),
-            TextInputField(
-              controller: _confirmPasswordController,
-              labelText: 'Confirm Password',
               isObscure: true,
             ),
             const SizedBox(height: 25),

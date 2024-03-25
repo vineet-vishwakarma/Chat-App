@@ -23,10 +23,6 @@ class AuthController {
         email: email,
         password: password,
       );
-      _firestore.collection('Users').doc(userCredential.user!.uid).set({
-        'uid': userCredential.user!.uid,
-        'email': userCredential.user!.email,
-      });
       return userCredential;
     } on FirebaseAuthException catch (e) {
       throw (e.code);
@@ -35,7 +31,7 @@ class AuthController {
 
   // Sign Up
   Future<UserCredential> signUpWithEmailPassword(
-      String email, String password) async {
+      String email, String password, String username) async {
     try {
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
@@ -47,6 +43,9 @@ class AuthController {
       _firestore.collection('Users').doc(userCredential.user!.uid).set({
         'uid': userCredential.user!.uid,
         'email': userCredential.user!.email,
+        'username': username,
+        'status': '',
+        'profilepic': '',
       });
       return userCredential;
     } on FirebaseAuthException catch (e) {

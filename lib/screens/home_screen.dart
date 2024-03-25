@@ -45,7 +45,7 @@ class HomeScreen extends StatelessWidget {
       builder: (context, snapshot) {
         // error
         if (snapshot.hasError) {
-          return const Text('Error');
+          return const Center(child: Text('Error'));
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -64,7 +64,7 @@ class HomeScreen extends StatelessWidget {
       Map<String, dynamic> userData, BuildContext context) {
     if (userData['email'] != _authController.getCurrentUser()!.email) {
       return UserTile(
-        text: userData['email'],
+        text: userData['username'],
         onTap: () {
           Navigator.push(
             context,
