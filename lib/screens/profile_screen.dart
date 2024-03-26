@@ -19,6 +19,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late FocusNode focusNode;
   File? _image;
+  double _uploadPercentage = 0;
   final AuthController _authController = AuthController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -52,45 +53,108 @@ class _ProfileScreenState extends State<ProfileScreen> {
     User? user = _authController.getCurrentUser();
 
     Future<void> selectImage() async {
-      final XFile? image =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
+      try {
+        final XFile? image =
+            await ImagePicker().pickImage(source: ImageSource.gallery);
 
-      if (image == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          backgroundColor: Colors.black,
-          content: Text(
-            'Image Not Selected!!!',
-            style: TextStyle(color: Colors.white),
-          ),
-        ));
-        return;
-      }
+        if (image == null) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            backgroundColor: Colors.black,
+            content: Text(
+              'Image Not Selected!!!',
+              style: TextStyle(color: Colors.white),
+            ),
+          ));
+          return;
+        }
 
-      setState(() {
-        _image = File(image.path);
-      });
-
-      if (_image != null) {
-        UploadTask uploadTask = _storage
-            .ref()
-            .child('ProfilePics')
-            .child(_authController.getCurrentUser()!.uid)
-            .putFile(_image!);
-        StreamSubscription streamSubscription =
-            uploadTask.snapshotEvents.listen((event) {
-          double percentage = (event.bytesTransferred / event.totalBytes) * 100;
-          showAboutDialog(
-              context: context, applicationName: percentage.toString());
+        setState(() {
+          _image = File(image.path);
         });
-        TaskSnapshot taskSnapshot = await uploadTask;
-        String downloadUrl = await taskSnapshot.ref.getDownloadURL();
 
-        streamSubscription.cancel();
+        if (_image != null) {
+          UploadTask uploadTask = _storage
+              .ref()
+              .child('ProfilePics')
+              .child(_authController.getCurrentUser()!.uid)
+              .putFile(_image!);
+          StreamSubscription streamSubscription =
+              uploadTask.snapshotEvents.listen((event) {
+            double percentage =
+                (event.bytesTransferred / event.totalBytes) * 100;
+            setState(() {
+              _uploadPercentage = percentage;
+            });
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              duration: _uploadPercentage == 100
+                  ? const Duration(seconds: 1)
+                  : const Duration(seconds: 2),
+              backgroundColor: Colors.black,
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _uploadPercentage == 100
+                      ? Text(
+                          'Downloaded!!',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        )
+                      : Text(
+                          'Downloading...',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: LinearProgressIndicator(
+                            value: _uploadPercentage,
+                            minHeight: 10,
+                            valueColor:
+                                const AlwaysStoppedAnimation(Colors.red),
+                            color: Colors.grey,
+                            backgroundColor: Colors.black,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        _uploadPercentage.toString(),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.inversePrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+          TaskSnapshot taskSnapshot = await uploadTask;
+          String downloadUrl = await taskSnapshot.ref.getDownloadURL();
 
-        await _firestore
-            .collection('Users')
-            .doc(_authController.getCurrentUser()!.uid)
-            .update({'profilepic': downloadUrl});
+          streamSubscription.cancel();
+
+          await _firestore
+              .collection('Users')
+              .doc(_authController.getCurrentUser()!.uid)
+              .update({'profilepic': downloadUrl});
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
 

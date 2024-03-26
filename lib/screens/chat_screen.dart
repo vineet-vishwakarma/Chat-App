@@ -9,11 +9,15 @@ import 'package:flutter/services.dart';
 
 class ChatScreen extends StatefulWidget {
   final String receiverEmail;
+  final String receiverUsername;
+  final String receiverProfilePic;
   final String receiverId;
   const ChatScreen({
     super.key,
     required this.receiverEmail,
     required this.receiverId,
+    required this.receiverUsername,
+    required this.receiverProfilePic,
   });
 
   @override
@@ -80,8 +84,18 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Theme.of(context).colorScheme.background,
-        title: Text(widget.receiverEmail),
-        centerTitle: true,
+        title: Row(
+          children: [
+            widget.receiverProfilePic.isNotEmpty
+                ? CircleAvatar(
+                    radius: 25,
+                    backgroundImage: NetworkImage(widget.receiverProfilePic),
+                  )
+                : const Icon(Icons.person),
+            const SizedBox(width: 20),
+            Text(widget.receiverUsername),
+          ],
+        ),
       ),
       body: Stack(
         alignment: Alignment.bottomRight,

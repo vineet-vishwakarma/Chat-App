@@ -4,13 +4,41 @@ import 'package:chat_app/screens/chat_screen.dart';
 import 'package:chat_app/screens/profile_screen.dart';
 import 'package:chat_app/widgets/custom_drawer.dart';
 import 'package:chat_app/widgets/user_tile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  
   final AuthController _authController = AuthController();
   final ChatController _chatController = ChatController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String? imageUrl;
+  Future<void> getImageUrl() async {
+    var snapshot = await _firestore
+        .collection('Users')
+        .doc(_authController.getCurrentUser()!.uid)
+        .get();
+    var data = snapshot.data();
+    if (data != null) {
+      setState(() {
+        imageUrl = data['profilepic'];
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getImageUrl();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +48,14 @@ class HomeScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 10.0),
-            child: CircleAvatar(
-              child: IconButton(
-                onPressed: () => Navigator.push(
+            child: InkWell(
+              onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ProfileScreen(),
-                  ),
-                ),
-                icon: const Icon(Icons.person),
+                      builder: (context) => const ProfileScreen())),
+              child: CircleAvatar(
+                foregroundImage:
+                    imageUrl != null ? NetworkImage(imageUrl!) : null,
               ),
             ),
           ),
@@ -64,12 +91,16 @@ class HomeScreen extends StatelessWidget {
       Map<String, dynamic> userData, BuildContext context) {
     if (userData['email'] != _authController.getCurrentUser()!.email) {
       return UserTile(
+        email: userData['email'],
         text: userData['username'],
+        profilepic: userData['profilepic'],
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => ChatScreen(
+                receiverProfilePic: userData['profilepic'],
+                receiverUsername: userData['username'],
                 receiverEmail: userData['email'],
                 receiverId: userData['uid'],
               ),
