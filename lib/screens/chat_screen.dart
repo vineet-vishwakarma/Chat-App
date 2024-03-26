@@ -1,5 +1,6 @@
 import 'package:chat_app/controllers/auth_controller.dart';
 import 'package:chat_app/controllers/chat_controller.dart';
+import 'package:chat_app/screens/user_screen.dart';
 import 'package:chat_app/widgets/chat_bubble.dart';
 import 'package:chat_app/widgets/text_input_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -84,17 +85,20 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Theme.of(context).colorScheme.background,
-        title: Row(
-          children: [
-            widget.receiverProfilePic.isNotEmpty
-                ? CircleAvatar(
-                    radius: 25,
-                    backgroundImage: NetworkImage(widget.receiverProfilePic),
-                  )
-                : const Icon(Icons.person),
-            const SizedBox(width: 20),
-            Text(widget.receiverUsername),
-          ],
+        title: GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context)=>UserScreen(userId: widget.receiverId,))),
+          child: Row(
+            children: [
+              widget.receiverProfilePic.isNotEmpty
+                  ? CircleAvatar(
+                      radius: 25,
+                      backgroundImage: NetworkImage(widget.receiverProfilePic),
+                    )
+                  : const Icon(Icons.person),
+              const SizedBox(width: 20),
+              Text(widget.receiverUsername),
+            ],
+          ),
         ),
       ),
       body: Stack(

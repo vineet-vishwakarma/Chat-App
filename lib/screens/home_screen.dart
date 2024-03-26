@@ -15,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  
   final AuthController _authController = AuthController();
   final ChatController _chatController = ChatController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -34,6 +33,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _refresh() {
+    getImageUrl();
+    return Future.delayed(const Duration(seconds: 2));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -42,27 +46,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.background,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10.0),
-            child: InkWell(
-              onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ProfileScreen())),
-              child: CircleAvatar(
-                foregroundImage:
-                    imageUrl != null ? NetworkImage(imageUrl!) : null,
+    return RefreshIndicator(
+      onRefresh: () => _refresh(),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.background,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: InkWell(
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProfileScreen())),
+                child: CircleAvatar(
+                  foregroundImage:
+                      imageUrl != null ? NetworkImage(imageUrl!) : null,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+        drawer: const CustomDrawer(),
+        body: _buildUserList(),
       ),
-      drawer: const CustomDrawer(),
-      body: _buildUserList(),
     );
   }
 

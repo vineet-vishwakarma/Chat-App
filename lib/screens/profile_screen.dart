@@ -97,7 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   _uploadPercentage == 100
                       ? Text(
-                          'Downloaded!!',
+                          'Uploaded!!',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.inversePrimary,
                             fontWeight: FontWeight.bold,
@@ -105,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         )
                       : Text(
-                          'Downloading...',
+                          'Uploading...',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.inversePrimary,
                             fontWeight: FontWeight.bold,
